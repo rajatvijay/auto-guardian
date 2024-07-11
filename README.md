@@ -2,6 +2,9 @@
 
 A command line utility to generate test cases for react components using AI.
 
+![](https://media3.giphy.com/media/sx6Tlo7xrzF2m24mNs/giphy.gif)
+
+
 ## NOTE
 
 This is a work in progress and is not ready for use. It originated from a talk I gave at React Nexus 2024.
