@@ -4,7 +4,7 @@ import { confirm, input } from "@inquirer/prompts";
 // import chalk from "chalk";
 import { highlight } from "cli-highlight";
 import { OpenAI } from "openai";
-import { ASSITANT_INSTRUCTION, MODEL_NAME } from "./config";
+import { ASSISTANT_INSTRUCTION, MODEL_NAME } from "./config";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -89,17 +89,19 @@ export const generateUnitTests = async (
   const componentCode = await readFileContent(componentFilePath);
   const childComponentCodes =
     await collectChildComponentCodes(componentFilePath);
-  const guidelines = guidelinesFilePath ? await readFileContent(guidelinesFilePath) : "";
+  const guidelines = guidelinesFilePath
+    ? await readFileContent(guidelinesFilePath)
+    : "";
 
   const assistant = await openai.beta.assistants.create({
     name: "AutoGuardian - Component Test Generator",
     model: MODEL_NAME,
-    instructions: ASSITANT_INSTRUCTION,
+    instructions: ASSISTANT_INSTRUCTION,
   });
 
   const thread = await openai.beta.threads.create();
 
-  let message = generateInitalMessage(
+  let message = generateInitialMessage(
     componentName,
     componentCode,
     childComponentCodes,
@@ -116,7 +118,9 @@ export const generateUnitTests = async (
     });
     if (wantToMakeUpdates) {
       // TODO: Add descriptive message for the user
-      message = await input({ message: "What changes would you like to make?" });
+      message = await input({
+        message: "What changes would you like to make?",
+      });
     } else {
       break;
     }
@@ -130,15 +134,17 @@ async function addMessageToThread(threadId: string, content: string) {
   });
 }
 
-function generateInitalMessage(
+function generateInitialMessage(
   componentName: string,
   componentCode: string,
   childComponentCodes: string[],
   guidelines: string
 ) {
   const contextCode = [componentCode, ...childComponentCodes].join("\n");
-  const firstLine = `Write integration test cases for component named ${componentName}.`
-  const guidelinesMessage = guidelines ? `The guidelines for the test cases are as follows:\n${guidelines}` : "";
+  const firstLine = `Write integration test cases for component named ${componentName}.`;
+  const guidelinesMessage = guidelines
+    ? `The guidelines for the test cases are as follows:\n${guidelines}`
+    : "";
   const contextMessage = `The component hierarchy code is as follows:\n${contextCode}`;
   return `${firstLine}\n\n${guidelinesMessage}\n\n${contextMessage}`;
 }
